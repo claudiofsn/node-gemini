@@ -6,7 +6,7 @@ const botaoLimpar = document.querySelector('#botao-limpar-conversa');
 botaoEnviar.addEventListener('click', enviarMensagem);
 botaoLimpar.addEventListener('click', limparConversa)
 
-input.addEventListener('keyup', function(event) {
+input.addEventListener('keyup', function (event) {
     event.preventDefault();
     if (event.keyCode === 13) {
         botaoEnviar.click();
@@ -16,20 +16,33 @@ input.addEventListener('keyup', function(event) {
 document.addEventListener('DOMContentLoaded', vaiParaFinalDoChat);
 
 async function enviarMensagem() {
-    if(input.value == '' || input.value == null) return;
+    if (input.value == '' || input.value == null) return;
 
     const mensagem = input.value;
     input.value = '';
 
-    const novaBolha = criaBolhaUsuario();
-    novaBolha.innerHTML = mensagem;
-    chat.appendChild(novaBolha);
+    try {
+        const response = await fetch('http://localhost:3000/chat', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({ 'mensagem': mensagem })
+        })
+        const novaBolha = criaBolhaUsuario();
+        novaBolha.innerHTML = mensagem;
+        chat.appendChild(novaBolha);
 
-    let novaBolhaBot = criaBolhaBot();
-    chat.appendChild(novaBolhaBot);
-    vaiParaFinalDoChat();
-    novaBolhaBot.innerHTML = mensagem;
-    vaiParaFinalDoChat();
+        let novaBolhaBot = criaBolhaBot();
+        chat.appendChild(novaBolhaBot);
+        vaiParaFinalDoChat();
+
+        const resposta = await response.json();
+        novaBolhaBot.innerHTML = resposta;
+        vaiParaFinalDoChat();
+    } catch (error) {
+        alert(error)
+    }
 }
 
 function criaBolhaUsuario() {
