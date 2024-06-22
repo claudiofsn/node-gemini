@@ -1,28 +1,39 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI('AIzaSyAoIUzaaUUPOGOqLgeiJ2_0CQKbshB_-BQ');
+import { chat, funcoes } from './inicializa-chat.js'
 
 export async function executaChat({ mensagem }) {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-
-    const chat = model.startChat({
-        history: [
-            {
-                role: "user",
-                parts: [{ text: "Você é Jordi, um chatbot amigável que representa a emopresa Jordnada Viagens. Você pode responder mensagens referentes a pacotes turíticos, viagens e destinos diversos." }],
-
-            },
-            {
-                role: "model",
-                parts: [{ text: "Olá! Obrigado por entrar em contato com o Jornada Viagens. Antes de responder suas dúvidas, pode me informar seu nome?" }],
-            },
-        ],
-        generationConfig: {
-            maxOutputTokens: 1000,
-        },
-    });
-
     const result = await chat.sendMessage(mensagem);
     const response = await result.response;
-    return response.text();
+
+    const content = response.candidates[0].content;
+
+    const fc = content.parts[0].functionCall;
+    const text = content.parts.map(({ text }) => text).join("");
+    console.log(text);
+    console.log(fc);
+
+    if (fc) {
+        const { name, args } = fc;
+        const fn = funcoes[name];
+        if (!fn) {
+            throw new Error(`Unknown function "${name}"`);
+        }
+        const fr = {
+            functionResponse: {
+                name,
+                response: {
+                    name,
+                    content: funcoes[name](args),
+                }
+            },
+        }
+
+        console.log(fr)
+
+        const request2 = [fr];
+        const response2 = await chat.sendMessage(request2);
+        const result2 = response2.response;
+        return result2.text();
+    } else if (text) {
+        return text;
+    }
 }

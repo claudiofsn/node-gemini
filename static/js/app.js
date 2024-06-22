@@ -29,6 +29,7 @@ async function enviarMensagem() {
             },
             body: JSON.stringify({ 'mensagem': mensagem })
         })
+
         const novaBolha = criaBolhaUsuario();
         novaBolha.innerHTML = mensagem;
         chat.appendChild(novaBolha);
@@ -38,7 +39,7 @@ async function enviarMensagem() {
         vaiParaFinalDoChat();
 
         const resposta = await response.json();
-        novaBolhaBot.innerHTML = resposta;
+        novaBolhaBot.innerHTML = resposta.response;
         vaiParaFinalDoChat();
     } catch (error) {
         alert(error)
