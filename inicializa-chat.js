@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI, FunctionDeclarationSchemaType } from "@google/generative-ai";
+import 'dotenv/config'
 
-const genAI = new GoogleGenerativeAI('AIzaSyAoIUzaaUUPOGOqLgeiJ2_0CQKbshB_-BQ');
+const genAI = new GoogleGenerativeAI(process.env.GOOGLE_TOKEN);
 
 const funcoes = {
     taxaJurosParcelamento: ({ value }) => {
